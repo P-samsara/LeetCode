@@ -1,0 +1,40 @@
+class Solution {
+public:
+    int shortestPathLength(vector<vector<int>>& graph) {
+        int n = graph.size();
+        vector<vector<int>> seen (n,vector<int>(1<<n,0));
+        //表明走到第n个点，并且全图是1 0 1 0 0状态时（分别对应是否被访问过） 所需要的步数，例如走到第2个点时，点0，2，3被访问过，则seen[2][1011] = seen[2][11] > 0
+        int theLeastEdgePoint, minNumEdges = INT_MAX, visit_all = (1<<n)-1;
+        queue<pair<int,int>> BFS;
+        for(int i = 0; i < graph.size(); i++){
+                int tmpSize = graph[i].size();
+                minNumEdges = min(minNumEdges, tmpSize);
+        }
+        for(int i = 0; i < graph.size(); i++){
+            if(graph[i].size() == minNumEdges)
+            //这里一定要把每个最小边数的顶点都考虑进去，他们在同一层，否则结果上下浮动1，不用担心
+            BFS.push({i,1<<i});
+        }
+        int result = INT_MAX;
+        BFS.push({theLeastEdgePoint,1<<theLeastEdgePoint});
+        while(!BFS.empty()){
+            int now = BFS.front().first;
+            int path = BFS.front().second;
+            BFS.pop();
+            if(path == visit_all){
+                // result = min(result,seen[now][path]);
+                // continue;
+                return seen[now][path];
+            }
+            for(int i = 0; i < graph[now].size(); i++){
+                int next = graph[now][i];
+                int next_path = path | 1<<next;
+                if(seen[next][next_path])
+                    continue;
+                seen[next][next_path] = 1 + seen[now][path];
+                BFS.push({next,next_path});
+            }
+        }
+        return 0;
+    }
+};
